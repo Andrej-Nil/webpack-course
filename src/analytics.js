@@ -13,11 +13,11 @@ function createAnalytics() {
 
     getCounter() {
       if (destroyed) {
-        return "Counter destroyed"
+        return `Analytics is destroyed. Total clicks = ${counter}`;
       }
       return counter;
     }
   }
 }
 
-window.analitecs = createAnalytics();
+window.analytics = createAnalytics();
