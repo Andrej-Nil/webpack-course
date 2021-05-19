@@ -2,8 +2,9 @@ import * as $ from 'jquery';
 import Post from '@models/Post';
 //import json from './assets/json';
 //import xml from './assets/data.xml';
-import csv from './assets/data.csv'
+//import csv from './assets/data.csv'
 import logo from './assets/webpack-logo.png';
+import './babel';
 import './styles/styles.css';
 import './styles/scss.scss';
 

@@ -9,6 +9,8 @@ const TerserPlugin = require("terser-webpack-plugin");
 const isDev = process.env.NODE_ENV === 'development';
 const isProd = !isDev;
 
+const filename = ext => isDev ? `[name].${ext}` : `[name].[hash]${ext}`
+
 const optimization = () => {
   const config = {
     splitChunks: {
@@ -23,19 +25,12 @@ const optimization = () => {
     ]
   }
   return config;
-}
-
-const filename = ext => isDev ? `[name].${ext}` : `[name].[hash]${ext}`
+};
 
 const cssLoaders = extra => {
   const loaders = [
     {
       loader: MiniCssExtractPlugin.loader,
-      options: {
-        //hmr: true,
-        //reloadAll: true,
-        //publicPath: path.resolve(__dirname, 'dist')
-      },
     },
     'css-loader'
   ]
@@ -45,13 +40,28 @@ const cssLoaders = extra => {
   }
 
   return loaders;
+};
+
+const babelOptions = preset => {
+
+  const opts = {
+    presets: [
+      '@babel/preset-env',
+    ],
+    plugins: ['@babel/plugin-proposal-class-properties']
+  }
+  if (preset) {
+    opts.presets.push(preset)
+  }
+  return opts;
 }
+
 module.exports = {
   context: path.resolve(__dirname, 'src'),
   mode: 'development',
   entry: {
-    main: './index.js',
-    analytics: './analytics.js',
+    main: ["@babel/polyfill", './index.js'],
+    analytics: './analytics.ts',
   },
   output: {
     filename: filename('js'),
@@ -70,12 +80,10 @@ module.exports = {
     hot: isDev,
     open: true
   },
+  devtool: isDev ? 'source-map' : '',
   plugins: [
     new HTMLWebpackPlugin({
       template: './index.html',
-      //minify: {
-      //  collapseWhitespace: isProd,
-      //}
     }),
     new CleanWebpackPlugin(),
     new CopyWebpackPlugin({
@@ -115,7 +123,31 @@ module.exports = {
       {
         test: /\.csv$/,
         use: ['csv-loader']
-      }
+      },
+      {
+        test: /\.m?js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: babelOptions()
+        }
+      },
+      {
+        test: /\.m?ts$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: babelOptions('@babel/preset-typescript'),
+        }
+      },
+      {
+        test: /\.m?jsx$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: babelOptions('@babel/preset-react'),
+        }
+      },
     ]
   }
 };
